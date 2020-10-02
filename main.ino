@@ -1,4 +1,16 @@
-#include <EEPROM.h>
+#include <EEPROM.h> //Is it necessary to use EEPROM?
+#include <GxEPD.h>
+#include <GxGDEW027C44/GxGDEW027C44.h>
+
+//TODO: Check that I need all the fonts - remove if no.
+#include <Fonts/FreeMonoBold9pt7b.h>
+#include <Fonts/FreeMonoBold12pt7b.h>
+#include <Fonts/FreeMonoBold18pt7b.h>
+#include <Fonts/FreeMonoBold24pt7b.h>
+
+
+#include <GxIO/GxIO_SPI/GxIO_SPI.h>
+#include <GxIO/GxIO.h>
 
 /////////////////////////////////////////////////
 //Address information section
@@ -20,16 +32,46 @@ const int HOURS_AM_PM = 12;
 volatile byte _minutes;
 volatile byte _hours;
 
+GxIO_Class io(SPI, /*CS=*/ SS, /*DC=*/ 8, /*RST=*/ 9); // arbitrary selection of 8, 9 selected for default of GxEPD_Class
+GxEPD_Class display(io, /*RST=*/ 9, /*BUSY=*/ 7); // default selection of (9), 7
+
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   //pinMode(13, OUTPUT);
   
   _minutes = 0;
   _hours = 0;
+
+  display.init(115200); // enable diagnostic output on Serial
+
+  Serial.println("setup done");
+
+  display.setRotation(1);
   
-  attachInterrupt(digitalPinToInterrupt(2), rtcTick, RISING);
+  display.drawPaged(showMyInformationCallback);
+
+
+  
+  //attachInterrupt(digitalPinToInterrupt(2), rtcTick, RISING);
 }
+
+void showMyInformationCallback()
+{
+  const char* name = "FreeMonoBold9pt7b";
+  const GFXfont* f = &FreeMonoBold9pt7b;
+  display.fillScreen(GxEPD_WHITE);
+  display.setTextColor(GxEPD_BLACK);
+  display.setFont(f);
+  display.setCursor(0, 0);
+  display.println();
+  display.println("Antonio");
+  
+  display.setTextColor(GxEPD_RED);
+
+  display.println("Il Ingegnere");
+}
+
 
 void rtcTick()
 {
