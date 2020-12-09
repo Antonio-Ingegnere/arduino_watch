@@ -244,14 +244,14 @@ void ShowMainMenu()
     dpd.TransmitPartialBlack(paint.GetImage(), INITIAL_SHIFT + 15 * (i + 1), 10, paint.GetWidth(), paint.GetHeight());
   }
   //Set pointer at the beginning
-  // paint.Clear(UNCOLORED);
-  // paint.SetHeight(10);
-  // paint.DrawStringAt(0, 0, ">", &Font16, COLORED);
-  // epd->TransmitPartialBlack(paint.GetImage(), INITIAL_SHIFT + 15, 190, paint.GetWidth(), paint.GetHeight());
+  paint.Clear(UNCOLORED);
+  paint.SetHeight(10);
+  paint.DrawStringAt(0, 0, ">", &Font16, COLORED);
+  dpd.TransmitPartialBlack(paint.GetImage(), INITIAL_SHIFT + 15, 190, paint.GetWidth(), paint.GetHeight());
 
   dpd.DisplayFrame();
 
-  // drawMenuPointer(epd, &paint, _currentState);
+//   drawMenuPointer(&dpd, &paint, _currentState);
 
   // delete epd;
 }
@@ -260,12 +260,6 @@ void drawMenuPointer(Epd *epd, Paint *paint, byte state)
 {
   Epd *localEpd = epd;
   Paint *localPaint = paint;
-
-  if (localEpd == NULL)
-    localEpd = getEpd();
-
-  if (localPaint == NULL)
-    localPaint = getPaint();
 
   paint->Clear(UNCOLORED);
   paint->SetHeight(10);
