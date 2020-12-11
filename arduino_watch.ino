@@ -56,18 +56,18 @@ void setup()
 {
   Serial.begin(115200);
 
-  // ShowMainMenu();
+  // // ShowMainMenu();
 
-  Epd epd;
+  // Epd epd;
 
-  if (epd.Init() != 0)
-  {
-    Serial.print("e-Paper init failed\r\n");
-    return;
-  }
+  // if (epd.Init() != 0)
+  // {
+  //   Serial.print("e-Paper init failed\r\n");
+  //   return;
+  // }
 
-  epd.ClearFrame();
-  epd.DisplayFrame();
+  // epd.ClearFrame();
+  // epd.DisplayFrame();
 
   //Initial setup
   _currentScreen = MAIN_SCREEN;
@@ -219,9 +219,9 @@ void ShowMainMenu()
 
   // Epd* epd = new Epd();// = getEpd();
 
-  Epd dpd;
+  Epd epd;
 
-  if (dpd.Init() != 0)
+  if (epd.Init() != 0)
   {
     Serial.print("e-Paper init failed\r\n");
     return;
@@ -231,7 +231,7 @@ void ShowMainMenu()
   unsigned char image[1600];
   Paint paint(image, 16, 174);
 
-  dpd.ClearFrame();
+  epd.ClearFrame();
 
   paint.SetRotate(ROTATE_270);
 
@@ -241,32 +241,45 @@ void ShowMainMenu()
   {
     paint.Clear(UNCOLORED);
     paint.DrawStringAt(0, 0, menu_options[i], &Font16, COLORED);
-    dpd.TransmitPartialBlack(paint.GetImage(), INITIAL_SHIFT + 15 * (i + 1), 10, paint.GetWidth(), paint.GetHeight());
+    epd.TransmitPartialBlack(paint.GetImage(), INITIAL_SHIFT + 15 * (i + 1), 10, paint.GetWidth(), paint.GetHeight());
   }
   //Set pointer at the beginning
   paint.Clear(UNCOLORED);
   paint.SetHeight(10);
   paint.DrawStringAt(0, 0, ">", &Font16, COLORED);
-  dpd.TransmitPartialBlack(paint.GetImage(), INITIAL_SHIFT + 15, 190, paint.GetWidth(), paint.GetHeight());
+  epd.TransmitPartialBlack(paint.GetImage(), INITIAL_SHIFT + 15, 190, paint.GetWidth(), paint.GetHeight());
 
-  dpd.DisplayFrame();
+  epd.DisplayFrame();
 
-//   drawMenuPointer(&dpd, &paint, _currentState);
+  //   drawMenuPointer(&dpd, &paint, _currentState);
 
   // delete epd;
 }
 
-void drawMenuPointer(Epd *epd, Paint *paint, byte state)
+void drawMenuPointer(byte state)
 {
-  Epd *localEpd = epd;
-  Paint *localPaint = paint;
+  Epd epd;
 
-  paint->Clear(UNCOLORED);
-  paint->SetHeight(10);
-  paint->SetWidth(16);
-  paint->DrawStringAt(0, 0, ">", &Font16, COLORED);
-  epd->TransmitPartialBlack(paint->GetImage(), INITIAL_SHIFT + 15 * (state + 1), 190, paint->GetWidth(), paint->GetHeight());
-  epd->RefreshPartial(190, 40, 10, 60);
+  if (epd.Init() != 0)
+  {
+    Serial.print("e-Paper init failed\r\n");
+    return;
+  }
+
+  unsigned char image[1600];
+  Paint paint(image, 16, 16);
+
+  epd.ClearFrame();
+
+  paint.SetRotate(ROTATE_270);
+
+  paint.Clear(UNCOLORED);
+  // paint.SetHeight(10);
+  // paint.SetWidth(16);
+  paint.DrawStringAt(0, 0, ">", &Font16, COLORED);
+  epd.TransmitPartialBlack(paint.GetImage(), INITIAL_SHIFT + 15 * (state + 1), 184, paint.GetWidth(), paint.GetHeight());
+  // epd.TransmitPartialBlack(paint.GetImage(), 5, 35, paint.GetWidth(), paint.GetHeight());
+  epd.RefreshPartial(42, 190, 72, 16);
 }
 
 #pragma endregion Menu
@@ -291,55 +304,24 @@ void userInteraction(byte command)
       break;
     }
   }
-  // else if (_currentScreen == SETTINGS_SCREEN)
-  // {
-  //   switch (command)
-  //   {
-  //   case COMMAND_DOWN:
-  //     ++_currentState;
-
-  //     if (_currentState > 3)
-  //       _currentState = 0;
-
-  //     drawMenuPointer(NULL, NULL, _currentState);
-  //     break;
-
-  //   default:
-  //     break;
-  //   }
-  // }
-}
-
-#pragma region Utils
-
-Epd *getEpd()
-{
-  Epd *epd = new Epd();
-
-  if (epd->Init() != 0)
+  else if (_currentScreen == SETTINGS_SCREEN)
   {
-    Serial.print("e-Paper init failed\r\n");
-    return NULL;
+    switch (command)
+    {
+    case COMMAND_DOWN:
+      ++_currentState;
+
+      if (_currentState > 3)
+        _currentState = 0;
+
+      drawMenuPointer(_currentState);
+      break;
+
+    default:
+      break;
+    }
   }
-
-  return epd;
 }
-
-Paint *getPaint()
-{
-  return getPaint(16, 10, ROTATE_270);
-}
-
-Paint *getPaint(int width, int height, int rotation)
-{
-  unsigned char image[1600];
-  Paint *paint = new Paint(image, 16, 174);
-  paint->SetRotate(rotation);
-
-  return paint;
-}
-
-#pragma endregion
 
 void loop()
 {
